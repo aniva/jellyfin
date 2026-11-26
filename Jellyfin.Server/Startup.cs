@@ -85,18 +85,8 @@ namespace Jellyfin.Server
             var acceptJsonHeader = new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json, 1.0);
             var acceptXmlHeader = new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Xml, 0.9);
             var acceptAnyHeader = new MediaTypeWithQualityHeaderValue("*/*", 0.8);
-            Func<IServiceProvider, HttpMessageHandler> eyeballsHttpClientHandlerDelegate = (_) => new SocketsHttpHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.All,
-                RequestHeaderEncodingSelector = (_, _) => Encoding.UTF8,
-                ConnectCallback = HttpClientExtension.OnConnect
-            };
-
-            Func<IServiceProvider, HttpMessageHandler> defaultHttpClientHandlerDelegate = (_) => new SocketsHttpHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.All,
-                RequestHeaderEncodingSelector = (_, _) => Encoding.UTF8
-            };
+            Func<IServiceProvider, HttpMessageHandler> eyeballsHttpClientHandlerDelegate = (_) => new OfflinePrivacyHttpMessageHandler();
+            Func<IServiceProvider, HttpMessageHandler> defaultHttpClientHandlerDelegate = (_) => new OfflinePrivacyHttpMessageHandler();
 
             services.AddHttpClient(NamedClient.Default, c =>
                 {
@@ -256,6 +246,24 @@ namespace Jellyfin.Server
                     endpoints.MapHealthChecks("/health");
                 });
             });
+        }
+
+        private sealed class OfflinePrivacyHttpMessageHandler : HttpMessageHandler
+        {
+            protected override System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            {
+                var host = request.RequestUri?.Host;
+                if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(host, "127.0.0.1", StringComparison.Ordinal)
+                    || string.Equals(host, "::1", StringComparison.Ordinal))
+                {
+                    var handler = new SocketsHttpHandler();
+                    var invoker = new HttpMessageInvoker(handler);
+                    return invoker.SendAsync(request, cancellationToken);
+                }
+
+                throw new HttpRequestException($"Outbound HTTP request to '{request.RequestUri}' blocked by offline privacy build.");
+            }
         }
     }
 }

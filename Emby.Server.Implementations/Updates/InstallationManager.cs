@@ -101,7 +101,12 @@ namespace Emby.Server.Implementations.Updates
         public IEnumerable<InstallationInfo> CompletedInstallations => _completedInstallationsInternal;
 
         /// <inheritdoc />
-        public async Task<PackageInfo[]> GetPackages(string manifestName, string manifest, bool filterIncompatible, CancellationToken cancellationToken = default)
+        public Task<PackageInfo[]> GetPackages(string manifestName, string manifest, bool filterIncompatible, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Array.Empty<PackageInfo>());
+        }
+
+        private async Task<PackageInfo[]> GetPackagesDisabledUnused(string manifestName, string manifest, bool filterIncompatible, CancellationToken cancellationToken = default)
         {
             try
             {

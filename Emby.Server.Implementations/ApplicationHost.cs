@@ -100,11 +100,6 @@ using MediaBrowser.Providers.Books.ComicBookInfo;
 using MediaBrowser.Providers.Books.ComicInfo;
 using MediaBrowser.Providers.Lyric;
 using MediaBrowser.Providers.Manager;
-using MediaBrowser.Providers.Plugins.ListenBrainz;
-using MediaBrowser.Providers.Plugins.ListenBrainz.Api;
-using MediaBrowser.Providers.Plugins.Tmdb;
-using MediaBrowser.Providers.Plugins.Tmdb.Movies;
-using MediaBrowser.Providers.Plugins.Tmdb.TV;
 using MediaBrowser.Providers.Subtitles;
 using MediaBrowser.XbmcMetadata.Providers;
 using Microsoft.AspNetCore.Http;
@@ -514,12 +509,7 @@ namespace Emby.Server.Implementations
 
             serviceCollection.AddScoped<ISystemManager, SystemManager>();
 
-            serviceCollection.AddSingleton<TmdbClientManager>();
-            serviceCollection.AddSingleton<TmdbMovieSimilarProvider>();
-            serviceCollection.AddSingleton<TmdbSeriesSimilarProvider>();
 
-            serviceCollection.AddSingleton<ListenBrainzLabsClient>();
-            serviceCollection.AddSingleton<ListenBrainzSimilarArtistProvider>();
 
             // register the generic local metadata provider for comic files
             serviceCollection.AddSingleton<ComicProvider>();
