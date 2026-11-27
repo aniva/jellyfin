@@ -134,10 +134,7 @@ namespace Jellyfin.Server.Extensions
 
                     opts.ModelBinderProviders.Insert(0, new NullableEnumModelBinderProvider());
 
-                    if (!serverConfiguration.EnableObsoleteEndpoints)
-                    {
-                        opts.Conventions.Add(new ObsoleteEndpointConvention());
-                    }
+                    // ObsoleteEndpointConvention disabled so jellyfin-web Folder View (/Users/{userId}/Items/{itemId}) never returns 410 Gone.
                 })
 
                 // Clear app parts to avoid other assemblies being picked up
